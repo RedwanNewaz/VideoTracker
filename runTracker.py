@@ -1,6 +1,5 @@
+import yaml
 import cv2
-
-frameTracker = {0: (940, 818, 156, 90), 242:(1647, 436, 119, 65)}
 def get_video_frames(name):
     video = cv2.VideoCapture(name)  # Replace with your video file
     cv2.namedWindow("Tracking", cv2.WINDOW_NORMAL)
@@ -14,14 +13,14 @@ def get_video_frames(name):
 
         frame_id += 1
 
-        # if frame_id < 200:
+        # if frame_id < 335:
         #     continue
         yield frame
 
     video.release()
     cv2.destroyAllWindows()
 
-def track_object(frames, numTrackers):
+def track_object(frames, numTrackers, frameTracker):
 
     roiFrames = list(frameTracker.keys())
     prevStates = []
@@ -46,8 +45,8 @@ def track_object(frames, numTrackers):
                 cv2.putText(frame, "Quadrotor", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
         # show previous trajectory
-        for center in prevStates[-numTrackers:]:
-        # for center in prevStates:
+        # for center in prevStates[-numTrackers:]:
+        for center in prevStates:
             # Draw circle at center point
             cv2.circle(frame, center, 10, (0, 255, 0), -1)
         # Display result
@@ -58,11 +57,14 @@ def track_object(frames, numTrackers):
             break
         frame_id = i + 1
         # print('video frame id = ', frame_id)
+def main(config):
+    with open(config, 'r') as stream:
+        config = yaml.safe_load(stream)
+    frameTracker = {int(key): tuple(val) for key, val in config['Tracker'].items()}
+    frames = get_video_frames(config['filepath'])
+    track_object(frames, 30, frameTracker)
 
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    frames = get_video_frames('/home/airlab/GDrive/ResearchWorkspace/Bow-ICRA-2025/Video/BOW(Drone)/PXL_20240724_183502779.mp4')
-    track_object(frames, numTrackers=30)
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    config = 'config/exp/PXL_20240724_181013995.yaml'
+    # config = 'config/exp/PXL_20240724_183502779.yaml'
+    main(config)
