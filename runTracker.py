@@ -45,8 +45,8 @@ def track_object(frames, numTrackers, frameTracker):
                 cv2.putText(frame, "Quadrotor", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
         # show previous trajectory
-        # for center in prevStates[-numTrackers:]:
-        for center in prevStates:
+        for center in prevStates[-numTrackers:]:
+        # for center in prevStates:
             # Draw circle at center point
             cv2.circle(frame, center, 10, (0, 255, 0), -1)
         # Display result
@@ -62,9 +62,10 @@ def main(config):
         config = yaml.safe_load(stream)
     frameTracker = {int(key): tuple(val) for key, val in config['Tracker'].items()}
     frames = get_video_frames(config['filepath'])
-    track_object(frames, 30, frameTracker)
+    numTrackers = config['numTrackers']
+    track_object(frames, numTrackers, frameTracker)
 
 if __name__ == '__main__':
-    config = 'config/exp/PXL_20240724_181013995.yaml'
-    # config = 'config/exp/PXL_20240724_183502779.yaml'
+    # config = 'config/exp/PXL_20240724_181013995.yaml'
+    config = 'config/exp/PXL_20240724_183502779.yaml'
     main(config)
